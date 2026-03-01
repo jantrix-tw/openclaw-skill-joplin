@@ -130,8 +130,10 @@ def joplin_post(path: str, data: dict | None = None, files=None) -> dict:
     params = _auth_params()
     try:
         if files is not None:
-            # Multipart upload — data goes as form fields, not JSON
-            resp = requests.post(url, params=params, data=data or {}, files=files, timeout=30)
+            # Multipart upload — Joplin API requires metadata in a 'props' field
+            # as a JSON-encoded string (not individual form fields).
+            props = json.dumps(data or {})
+            resp = requests.post(url, params=params, data={"props": props}, files=files, timeout=30)
         else:
             resp = requests.post(url, params=params, json=data or {}, timeout=10)
     except requests.exceptions.ConnectionError:
@@ -196,12 +198,24 @@ def get_note_with_wrap(note_id: str) -> dict:
     """Fetch a note by ID, truncate body, and wrap content in security delimiters.
 
     Convenience helper used by several scripts.
+    Raises a clear error if the note is empty, trashed (deleted_time > 0),
+    or otherwise inaccessible.
     """
     note_id = validate_id(note_id, "note_id")
     data = joplin_get(
         f"/notes/{note_id}",
-        params={"fields": "id,title,body,parent_id,created_time,updated_time"},
+        params={"fields": "id,title,body,parent_id,created_time,updated_time,deleted_time"},
     )
+    # Guard against empty/missing response (e.g. 204 or unexpected blank body)
+    if not data:
+        die("Note not found or returned an empty response.", code=404)
+    # Detect trashed notes: Joplin sets deleted_time > 0 when a note is in the trash
+    if data.get("deleted_time", 0) > 0:
+        die(
+            "Note has been moved to trash and is no longer active. "
+            "Permanently delete or restore it in Joplin first.",
+            code=404,
+        )
     data = _truncate_body(data)
     data = _wrap_note_content(data)
     return data

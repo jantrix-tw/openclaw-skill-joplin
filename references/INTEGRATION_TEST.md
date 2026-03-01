@@ -34,7 +34,7 @@
 ### Get
 - [ ] Retrieve the note: `python get_note.py --id $NOTE_ID`
 - [ ] Verify title is `Integration Test Note` and body contains `Hello, Joplin!`
-- [ ] Verify output contains `FIELD START` / `FIELD END` delimiters (see §9)
+- [ ] Verify output contains `--- NOTE CONTENT START ---` / `--- NOTE CONTENT END ---` delimiters (see §9)
 
 ### Update
 - [ ] Update the note body:
@@ -78,7 +78,7 @@
 - [ ] Record the returned ID as `$TAG_NOTE_ID`
 - [ ] Add a tag: `python add_tag.py --id $TAG_NOTE_ID --tag "integration-test"`
 - [ ] Verify tag: `python get_note.py --id $TAG_NOTE_ID` — confirm `integration-test` appears in tags
-- [ ] Remove the tag: `python remove_tag.py --id $TAG_NOTE_ID --tag "integration-test"`
+- [ ] Remove the tag: `python remove_tag.py --note-id $TAG_NOTE_ID --tag "integration-test"`
 - [ ] Verify tag removed: run `get_note` again and confirm `integration-test` is absent from tags
 
 ---
@@ -92,7 +92,7 @@
 - [ ] Record the returned ID as `$SEARCH_NOTE_ID`
 - [ ] Run `python search_notes.py --query "xyzzy_unique_search_term"` and verify `$SEARCH_NOTE_ID` appears in results
 - [ ] Run `python search_notes.py --query "xyzzy_unique_search_term" --limit 1` and verify exactly one result is returned
-- [ ] Verify output contains `FIELD START` / `FIELD END` delimiters (see §9)
+- [ ] Verify output contains `--- NOTE CONTENT START ---` / `--- NOTE CONTENT END ---` delimiters (see §9)
 
 ---
 
@@ -183,9 +183,9 @@
 ## 9. Content Delimiter Verification
 
 - [ ] Run `python get_note.py --id $SEARCH_NOTE_ID` and confirm output contains:
-  - `<!-- FIELD START: title -->` … `<!-- FIELD END: title -->`
-  - `<!-- FIELD START: body -->` … `<!-- FIELD END: body -->`
-- [ ] Run `python search_notes.py --query "xyzzy_unique_search_term"` and confirm each result block contains equivalent `FIELD START` / `FIELD END` wrappers
+  - `--- NOTE CONTENT START ---` at the start of the body field
+  - `--- NOTE CONTENT END ---` at the end of the body field
+- [ ] Run `python search_notes.py --query "xyzzy_unique_search_term"` and confirm each result block contains equivalent `NOTE CONTENT START` / `NOTE CONTENT END` wrappers
 - [ ] Verify no field content bleeds across delimiter boundaries
 
 ---
